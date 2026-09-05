@@ -124,14 +124,117 @@
     });
   }
 
+  // --- Ending illustrations ----------------------------------------------
+  // Friend and Enemy endings now use full scene artwork instead of relying
+  // only on the portrait sprite. The player silhouette is intentionally
+  // gender-neutral in all four images.
+
+  function currentRun() {
+    try {
+      return JSON.parse(localStorage.getItem("heartglass_run_v1"));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function endingArtFor(run) {
+    if (!run || !run.route) return null;
+    if (run.scene === "ending_friend") {
+      return {
+        src: `assets/endings/${run.route}_friend_goodbye.jpg`,
+        alt: run.route === "male"
+          ? "Caelan waving goodbye toward the portal as the player returns to the antique shop."
+          : "Caelia waving goodbye toward the portal as the player returns to the antique shop."
+      };
+    }
+    if (run.scene === "ending_enemy") {
+      return {
+        src: `assets/endings/${run.route}_enemy_goodbye.jpg`,
+        alt: run.route === "male"
+          ? "Caelan stands with crossed arms and looks away as the player returns to the antique shop."
+          : "Caelia stands with crossed arms and looks away as the player returns to the antique shop."
+      };
+    }
+    return null;
+  }
+
+  function installEndingArtStyles() {
+    if (document.getElementById("heartglass-ending-art-style")) return;
+    const style = document.createElement("style");
+    style.id = "heartglass-ending-art-style";
+    style.textContent = `
+      .ending-scene-art-wrap {
+        margin: 0 0 1.15rem;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(218, 187, 105, 0.34);
+        background: rgba(5, 17, 13, 0.65);
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.26);
+      }
+      .ending-scene-art {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 58vh;
+        object-fit: cover;
+      }
+      .game-screen.ending-art-active .portrait-panel {
+        display: none !important;
+      }
+      .game-screen.ending-art-active .story-stage {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+      @media (max-width: 720px) {
+        .ending-scene-art-wrap { border-radius: 13px; }
+        .ending-scene-art { max-height: none; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function syncEndingArtwork() {
+    const story = document.getElementById("storyText");
+    const gameScreen = document.getElementById("gameScreen");
+    if (!story || !gameScreen) return;
+
+    const spec = endingArtFor(currentRun());
+    const existing = story.querySelector(".ending-scene-art-wrap");
+
+    if (!spec) {
+      gameScreen.classList.remove("ending-art-active");
+      if (existing) existing.remove();
+      return;
+    }
+
+    gameScreen.classList.add("ending-art-active");
+    if (existing && existing.dataset.src === spec.src) return;
+    if (existing) existing.remove();
+
+    const figure = document.createElement("figure");
+    figure.className = "ending-scene-art-wrap";
+    figure.dataset.src = spec.src;
+
+    const img = document.createElement("img");
+    img.className = "ending-scene-art";
+    img.src = spec.src;
+    img.alt = spec.alt;
+    img.loading = "eager";
+    img.decoding = "async";
+
+    figure.appendChild(img);
+    story.prepend(figure);
+  }
+
   function sweep() {
     repairVisiblePlaceholders(document.getElementById("storyText"));
     repairVisiblePlaceholders(document.getElementById("choices"));
     repairVisiblePlaceholders(document.getElementById("speaker"));
     rebalanceChoiceOrder();
+    syncEndingArtwork();
   }
 
   function start() {
+    installEndingArtStyles();
     const app = document.getElementById("app") || document.body;
     const observer = new MutationObserver(sweep);
     observer.observe(app, { childList: true, subtree: true, characterData: true });
