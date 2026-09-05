@@ -1508,6 +1508,11 @@
   function commitChoice(choice, clickedButton) {
     if (!state || state.pending) return;
     const sceneId = state.scene;
+    const node = scenes[sceneId];
+    if (!node) {
+      console.error("Unknown scene while committing choice", sceneId);
+      return;
+    }
     if (state.committed[sceneId]) return;
 
     [...choicesEl.querySelectorAll("button")].forEach(b => b.disabled = true);
