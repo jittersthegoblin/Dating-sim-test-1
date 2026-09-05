@@ -1,0 +1,147 @@
+/* Heartglass ending gallery + full ending CGs (Build 1.2.0) */
+body.gallery-open { overflow: hidden; }
+
+.gallery-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  overflow-y: auto;
+  padding: clamp(1rem, 3vw, 3rem);
+  background: rgba(3, 12, 9, 0.88);
+  backdrop-filter: blur(12px);
+}
+.gallery-overlay.hidden,
+.gallery-lightbox.hidden { display: none !important; }
+.gallery-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: clamp(1.2rem, 3vw, 2.3rem);
+}
+.gallery-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .5rem;
+}
+.gallery-header h2 { margin: .15rem 0 .2rem; }
+.gallery-progress,
+.gallery-note { opacity: .78; }
+.gallery-note { margin: .4rem 0 1.7rem; }
+.gallery-grid { display: grid; gap: 1.15rem; }
+.gallery-ending-group {
+  padding: 1rem;
+  border: 1px solid rgba(218, 187, 105, .22);
+  border-radius: 18px;
+  background: rgba(5, 18, 13, .38);
+}
+.gallery-ending-heading {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-bottom: .85rem;
+}
+.gallery-ending-heading h3,
+.gallery-ending-heading p { margin: 0; }
+.gallery-ending-heading p { opacity: .68; font-size: .88rem; }
+.gallery-ending-icon { font-size: 1.55rem; }
+.gallery-route-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+}
+.gallery-card {
+  appearance: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(218, 187, 105, .28);
+  border-radius: 14px;
+  background: rgba(9, 26, 19, .72);
+}
+button.gallery-card { cursor: pointer; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+button.gallery-card:hover,
+button.gallery-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(236, 211, 139, .66);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .24);
+}
+.gallery-thumb {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, rgba(77, 116, 83, .35), rgba(3, 12, 9, .9));
+}
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery-thumb img.gallery-wedding-image { object-fit: contain; padding: .5rem; }
+.gallery-locked-thumb {
+  background:
+    linear-gradient(135deg, rgba(25, 55, 39, .65), rgba(7, 18, 14, .95)),
+    radial-gradient(circle, rgba(218, 187, 105, .16), transparent 60%);
+}
+.gallery-locked-thumb span { font-size: 2rem; opacity: .42; }
+.gallery-card-copy {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .6rem;
+  padding: .72rem .85rem;
+}
+.gallery-card-copy span { opacity: .64; font-size: .82rem; }
+.gallery-card.locked { opacity: .58; }
+
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, .93);
+}
+.gallery-lightbox figure { margin: 0; max-width: min(1200px, 96vw); max-height: 92vh; display: grid; gap: .65rem; }
+.gallery-lightbox img { max-width: 100%; max-height: 84vh; object-fit: contain; border-radius: 12px; box-shadow: 0 24px 70px rgba(0,0,0,.5); }
+.gallery-lightbox figcaption { text-align: center; color: #efe3bb; }
+.gallery-lightbox-close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(8,18,14,.8);
+  color: white;
+  font-size: 1.7rem;
+  cursor: pointer;
+}
+
+.ending-cg-v2 {
+  margin: 0 0 1.1rem;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(218, 187, 105, .34);
+  background: rgba(5, 17, 13, .66);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, .26);
+}
+.ending-cg-v2 img {
+  display: block;
+  width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+}
+.game-screen.ending-cg-v2-active .portrait-panel { display: none !important; }
+.game-screen.ending-cg-v2-active .story-stage { grid-template-columns: minmax(0, 1fr) !important; }
+.ending-cg-marriage img { max-height: 68vh; padding: .45rem; }
+
+@media (max-width: 720px) {
+  .gallery-route-row { grid-template-columns: 1fr; }
+  .gallery-ending-group { padding: .75rem; border-radius: 14px; }
+  .gallery-shell { padding: 1rem; }
+  .ending-cg-v2 { border-radius: 13px; }
+  .ending-cg-v2 img { max-height: none; }
+}
