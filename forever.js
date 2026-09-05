@@ -417,7 +417,8 @@
     document.head.appendChild(style);
   }
 
-  function refresh() {
+  function refreshFromStorage() {
+    forever = loadForever();
     awardCrystalIfNeeded();
     renderWidget();
   }
@@ -428,21 +429,14 @@
     awardCrystalIfNeeded();
 
     const app = document.getElementById("app") || document.body;
-    let queued = false;
     const observer = new MutationObserver(() => {
-      if (queued) return;
-      queued = true;
-      queueMicrotask(() => {
-        queued = false;
-        refresh();
-      });
+      awardCrystalIfNeeded();
     });
     observer.observe(app, { childList: true, subtree: true, characterData: true });
 
     window.addEventListener("storage", event => {
       if (event.key === RUN_KEY || event.key === FOREVER_KEY) {
-        forever = loadForever();
-        refresh();
+        refreshFromStorage();
       }
     });
   }
