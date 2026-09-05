@@ -21,7 +21,6 @@
 
   function imageFor(route, ending) {
     if (ending === "marriage") return `assets/sprites/${route}_wedding.png`;
-    if (ending === "enemy" || ending === "friend") return `assets/endings/${route}_${ending}_goodbye.webp`;
     return `assets/endings/${route}_${ending}.webp`;
   }
 
@@ -29,7 +28,7 @@
     const name = routes[route]?.name || "The fae";
     const text = {
       enemy: `${name} looks sadly back through the portal with their arms crossed.`,
-      neutral: `${name} gives the player a calm, polite wave through the portal.`,
+      neutral: `${name} gives a calm, polite wave through the portal.`,
       friend: `${name} smiles and waves warmly through the portal.`,
       romance: `${name} looks up from a book, delighted that the player has returned.`,
       engaged: `${name} looks up from a book with a deeply loving expression as the player returns.`,
@@ -77,6 +76,7 @@
       if (ending) unlock(run.route, ending, "current-run");
     }
 
+    // Migrate endings that were already discovered before the gallery existed.
     const meta = readJson(META_KEY, null);
     const discovered = meta?.discovered || {};
     for (const [ending, record] of Object.entries(discovered)) {
@@ -243,59 +243,12 @@
     });
   }
 
-  function installEndingCg() {
-    const run = readJson(RUN_KEY, null);
-    const ending = endingFromScene(run?.scene);
-    const dialogue = document.querySelector("#gameScreen .dialogue-card");
-    const game = document.getElementById("gameScreen");
-    if (!dialogue || !game) return;
-
-    const existing = dialogue.querySelector(".ending-cg-v2");
-    const handledByLegacyArt = ending === "enemy" || ending === "friend";
-
-    if (!run?.route || !ending || handledByLegacyArt) {
-      if (existing) existing.remove();
-      game.classList.remove("ending-cg-v2-active");
-      return;
-    }
-
-    const src = imageFor(run.route, ending);
-    if (existing?.dataset.src === src) {
-      game.classList.add("ending-cg-v2-active");
-      return;
-    }
-    if (existing) existing.remove();
-
-    const figure = document.createElement("figure");
-    figure.className = `ending-cg-v2 ending-cg-${ending}`;
-    figure.dataset.src = src;
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = altFor(run.route, ending);
-    img.loading = "eager";
-    img.decoding = "async";
-    figure.appendChild(img);
-
-    const story = document.getElementById("storyText");
-    dialogue.insertBefore(figure, story || dialogue.firstChild);
-    game.classList.add("ending-cg-v2-active");
-  }
-
-  function sync() {
-    syncUnlocks();
-    installEndingCg();
-  }
-
   function start() {
     installGalleryUi();
-    sync();
-
-    const app = document.getElementById("app") || document.body;
-    const observer = new MutationObserver(() => sync());
-    observer.observe(app, { childList: true, subtree: true, characterData: true });
+    syncUnlocks();
 
     window.addEventListener("storage", event => {
-      if ([RUN_KEY, META_KEY, GALLERY_KEY].includes(event.key)) sync();
+      if ([RUN_KEY, META_KEY, GALLERY_KEY].includes(event.key)) syncUnlocks();
     });
 
     window.addEventListener("keydown", event => {
