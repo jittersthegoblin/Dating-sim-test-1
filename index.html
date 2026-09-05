@@ -65,6 +65,7 @@
       <footer class="game-footer">
         <span>Choices are permanent for this playthrough.</span>
         <span id="saveIndicator">Autosave on</span>
+        <span id="buildVersion">Build 1.1.1</span>
       </footer>
     </section>
 
@@ -99,6 +100,28 @@
     </div>
   </div>
 
-  <script src="game.js"></script>
+  <script>
+    // Heartglass 1.1.1 hotfix: V1 shipped with one missing local variable in the
+    // choice handler. This global fallback supplies the current speaker so the
+    // original handler can finish normally until the next full build.
+    var node = {};
+    Object.defineProperty(node, "speaker", {
+      configurable: false,
+      get: function () {
+        var el = document.getElementById("speaker");
+        return el ? el.textContent : "";
+      }
+    });
+
+    // Recover only a malformed/incomplete save that is stuck on an already
+    // committed scene without a pending reaction. Normal saves are untouched.
+    try {
+      var hg = JSON.parse(localStorage.getItem("heartglass_run_v1"));
+      if (hg && hg.scene && hg.committed && hg.committed[hg.scene] && !hg.pending) {
+        localStorage.removeItem("heartglass_run_v1");
+      }
+    } catch (e) {}
+  </script>
+  <script src="game.js?v=1.1.1"></script>
 </body>
 </html>
