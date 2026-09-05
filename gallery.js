@@ -19,6 +19,9 @@
     { id: "marriage", icon: "✨", title: "Wherever You Are Is Home", label: "Secret / Best Ending", secret: true }
   ];
 
+  const routeIds = Object.keys(routes);
+  const endingIds = endings.map(x => x.id);
+
   function imageFor(route, ending) {
     if (ending === "marriage") return `assets/sprites/${route}_wedding.png`;
     return `assets/endings/${route}_${ending}.webp`;
@@ -54,10 +57,18 @@
     localStorage.setItem(GALLERY_KEY, JSON.stringify(data));
   }
 
+  function galleryKey(route, ending) {
+    return `${route}_${ending}`;
+  }
+
+  function isValidPair(route, ending) {
+    return routeIds.includes(route) && endingIds.includes(ending);
+  }
+
   function unlock(route, ending, source = "ending") {
-    if (!routes[route] || !endings.some(x => x.id === ending)) return false;
+    if (!isValidPair(route, ending)) return false;
     const gallery = loadGallery();
-    const key = `${route}_${ending}`;
+    const key = galleryKey(route, ending);
     if (gallery.unlocked[key]) return false;
     gallery.unlocked[key] = { firstSeen: Date.now(), source };
     saveGallery(gallery);
@@ -70,17 +81,23 @@
   }
 
   function syncUnlocks() {
+    // The current playthrough is authoritative. Only the exact route currently
+    // being played may unlock the ending scene the player actually reached.
     const run = readJson(RUN_KEY, null);
-    if (run?.route) {
+    if (run && routeIds.includes(run.route)) {
       const ending = endingFromScene(run.scene);
       if (ending) unlock(run.route, ending, "current-run");
     }
 
-    // Migrate endings that were already discovered before the gallery existed.
+    // Preserve endings discovered before the gallery existed. The old
+    // storybook stores the route that first discovered an ending, so migrate
+    // only that exact route rather than unlocking both versions.
     const meta = readJson(META_KEY, null);
     const discovered = meta?.discovered || {};
     for (const [ending, record] of Object.entries(discovered)) {
-      if (record?.route) unlock(record.route, ending, "storybook-migration");
+      if (endingIds.includes(ending) && routeIds.includes(record?.route)) {
+        unlock(record.route, ending, "storybook-migration");
+      }
     }
   }
 
@@ -172,6 +189,7 @@
   }
 
   function openLightbox(route, ending) {
+    if (!isValidPair(route, ending)) return;
     const info = endings.find(x => x.id === ending);
     const img = document.getElementById("galleryLightboxImage");
     const caption = document.getElementById("galleryLightboxCaption");
@@ -195,17 +213,16 @@
 
     const gallery = loadGallery();
     const unlocked = gallery.unlocked || {};
-    const count = Object.keys(unlocked).filter(key => {
-      const [route, ...rest] = key.split("_");
-      return routes[route] && endings.some(x => x.id === rest.join("_"));
-    }).length;
+    const count = endings.reduce((total, info) => {
+      return total + routeIds.filter(route => !!unlocked[galleryKey(route, info.id)]).length;
+    }, 0);
     progress.textContent = `${count} / 12 ending memories unlocked`;
     grid.innerHTML = "";
 
     endings.forEach(info => {
       const group = document.createElement("section");
       group.className = "gallery-ending-group";
-      const marriageKnown = !!unlocked.male_marriage || !!unlocked.female_marriage;
+      const marriageKnown = !!unlocked[galleryKey("male", "marriage")] || !!unlocked[galleryKey("female", "marriage")];
       const hiddenSecret = info.secret && !marriageKnown;
       group.innerHTML = `
         <div class="gallery-ending-heading">
@@ -216,8 +233,8 @@
       `;
 
       const row = group.querySelector(".gallery-route-row");
-      ["male", "female"].forEach(route => {
-        const key = `${route}_${info.id}`;
+      routeIds.forEach(route => {
+        const key = galleryKey(route, info.id);
         const found = !!unlocked[key];
         const card = document.createElement(found ? "button" : "article");
         card.className = `gallery-card ${found ? "unlocked" : "locked"}`;
