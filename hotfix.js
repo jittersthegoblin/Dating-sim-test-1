@@ -98,8 +98,6 @@
     if (!container) return;
 
     const buttons = Array.from(container.querySelectorAll(":scope > button.choice-btn"));
-    // Leave two-choice setup questions (including romance gender selection)
-    // alone. The pattern problem only matters once there are 3+ choices.
     if (buttons.length < 3) return;
 
     const ids = buttons.map(btn => btn.dataset.choiceId || btn.textContent.trim()).sort().join("|");
@@ -117,17 +115,14 @@
     ordered.forEach(btn => fragment.appendChild(btn));
     container.appendChild(fragment);
 
-    // The game displays the choice number from data-key, so renumber after
-    // moving the buttons to keep 1 / 2 / 3 visually correct.
     Array.from(container.querySelectorAll(":scope > button.choice-btn")).forEach((btn, index) => {
       btn.dataset.key = String(index + 1);
     });
   }
 
   // --- Ending illustrations ----------------------------------------------
-  // Friend and Enemy endings now use full scene artwork instead of relying
-  // only on the portrait sprite. The player silhouette is intentionally
-  // gender-neutral in all four images.
+  // Every ending now uses a full ending CG. The player is never visibly shown.
+  // Marriage keeps the existing wedding artwork already used by the game.
 
   function currentRun() {
     try {
@@ -139,23 +134,27 @@
 
   function endingArtFor(run) {
     if (!run || !run.route) return null;
-    if (run.scene === "ending_friend") {
-      return {
-        src: `assets/endings/${run.route}_friend_goodbye.webp`,
-        alt: run.route === "male"
-          ? "Caelan waving goodbye toward the portal as the player returns to the antique shop."
-          : "Caelia waving goodbye toward the portal as the player returns to the antique shop."
-      };
-    }
-    if (run.scene === "ending_enemy") {
-      return {
-        src: `assets/endings/${run.route}_enemy_goodbye.webp`,
-        alt: run.route === "male"
-          ? "Caelan stands with crossed arms and looks away as the player returns to the antique shop."
-          : "Caelia stands with crossed arms and looks away as the player returns to the antique shop."
-      };
-    }
-    return null;
+    const match = /^ending_(enemy|neutral|friend|romance|engaged|marriage)$/.exec(run.scene || "");
+    if (!match) return null;
+
+    const ending = match[1];
+    const name = run.route === "male" ? "Caelan" : "Caelia";
+    const descriptions = {
+      enemy: `${name} looks sadly back through the portal with their arms crossed.`,
+      neutral: `${name} gives a calm, polite wave through the portal.`,
+      friend: `${name} smiles and waves warmly through the portal.`,
+      romance: `${name} looks up from a book, delighted that the player has returned.`,
+      engaged: `${name} looks up from a book with a deeply loving expression as the player returns.`,
+      marriage: `${name} waits in wedding attire, holding out their hand toward the player.`
+    };
+
+    return {
+      ending,
+      src: ending === "marriage"
+        ? `assets/sprites/${run.route}_wedding.png`
+        : `assets/endings/${run.route}_${ending}.webp`,
+      alt: descriptions[ending]
+    };
   }
 
   function installEndingArtStyles() {
@@ -175,8 +174,12 @@
         display: block;
         width: 100%;
         height: auto;
-        max-height: 58vh;
-        object-fit: cover;
+        max-height: 62vh;
+        object-fit: contain;
+      }
+      .ending-scene-art-wrap[data-ending="marriage"] .ending-scene-art {
+        max-height: 68vh;
+        padding: 0.45rem;
       }
       .game-screen.ending-art-active .portrait-panel {
         display: none !important;
@@ -213,6 +216,7 @@
     const figure = document.createElement("figure");
     figure.className = "ending-scene-art-wrap";
     figure.dataset.src = spec.src;
+    figure.dataset.ending = spec.ending;
 
     const img = document.createElement("img");
     img.className = "ending-scene-art";
