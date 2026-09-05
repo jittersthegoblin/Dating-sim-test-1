@@ -141,7 +141,7 @@
     if (!run || !run.route) return null;
     if (run.scene === "ending_friend") {
       return {
-        src: `assets/endings/${run.route}_friend_goodbye.jpg`,
+        src: `assets/endings/${run.route}_friend_goodbye.webp`,
         alt: run.route === "male"
           ? "Caelan waving goodbye toward the portal as the player returns to the antique shop."
           : "Caelia waving goodbye toward the portal as the player returns to the antique shop."
@@ -149,7 +149,7 @@
     }
     if (run.scene === "ending_enemy") {
       return {
-        src: `assets/endings/${run.route}_enemy_goodbye.jpg`,
+        src: `assets/endings/${run.route}_enemy_goodbye.webp`,
         alt: run.route === "male"
           ? "Caelan stands with crossed arms and looks away as the player returns to the antique shop."
           : "Caelia stands with crossed arms and looks away as the player returns to the antique shop."
