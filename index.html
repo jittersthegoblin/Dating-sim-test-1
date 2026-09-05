@@ -50,7 +50,7 @@
       <footer class="game-footer">
         <span>Choices are permanent for this playthrough.</span>
         <span id="saveIndicator">Autosave on</span>
-        <span id="buildVersion">Build 1.1.2</span>
+        <span id="buildVersion">Build 1.1.3</span>
       </footer>
     </section>
 
@@ -79,7 +79,6 @@
   </div>
 
   <script>
-    // Choice progression compatibility hotfix for the original V1 script.
     var node = {};
     Object.defineProperty(node, "speaker", {
       configurable: false,
@@ -93,7 +92,7 @@
       if (hg && hg.scene && hg.committed && hg.committed[hg.scene] && !hg.pending) localStorage.removeItem("heartglass_run_v1");
     } catch (e) {}
   </script>
-  <script src="game.js?v=1.1.2"></script>
-  <script src="hotfix.js?v=1.1.2"></script>
+  <script src="game.js?v=1.1.3"></script>
+  <script src="hotfix.js?v=1.1.3"></script>
 </body>
 </html>
