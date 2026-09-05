@@ -63,7 +63,9 @@
     ids.forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      if (!el.dataset.sidepathDisplay) el.dataset.sidepathDisplay = el.style.display || "";
+      if (!Object.prototype.hasOwnProperty.call(el.dataset, "sidepathDisplay")) {
+        el.dataset.sidepathDisplay = el.style.display || "";
+      }
       el.style.display = "none";
     });
     panel.hidden = false;
