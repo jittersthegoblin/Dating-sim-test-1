@@ -122,7 +122,6 @@
 
   // --- Ending illustrations ----------------------------------------------
   // Every ending now uses a full ending CG. The player is never visibly shown.
-  // Marriage keeps the existing wedding artwork already used by the game.
 
   function currentRun() {
     try {
@@ -145,14 +144,12 @@
       friend: `${name} smiles and waves warmly through the portal.`,
       romance: `${name} looks up from a book, delighted that the player has returned.`,
       engaged: `${name} looks up from a book with a deeply loving expression as the player returns.`,
-      marriage: `${name} waits in wedding attire, holding out their hand toward the player.`
+      marriage: `${name} waits at the fae wedding altar in wedding attire, holding out their hand toward the player.`
     };
 
     return {
       ending,
-      src: ending === "marriage"
-        ? `assets/sprites/${run.route}_wedding.png`
-        : `assets/endings/${run.route}_${ending}.webp`,
+      src: `assets/endings/${run.route}_${ending}.webp`,
       alt: descriptions[ending]
     };
   }
