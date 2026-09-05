@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#16271f" />
+  <meta name="description" content="Heartglass: Across the Veil — a branching fae romance dialogue game." />
+  <title>Heartglass: Across the Veil</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-location="title">
+  <div id="ambient" aria-hidden="true"></div>
+
+  <main id="app" class="app-shell">
+    <section id="titleScreen" class="screen title-screen">
+      <div class="title-card glass-card">
+        <div class="heartglass-mark" aria-hidden="true">
+          <span class="gem"></span>
+        </div>
+        <p class="eyebrow">A choice-driven fae romance</p>
+        <h1>Heartglass</h1>
+        <p class="subtitle">Across the Veil</p>
+        <p class="title-copy">
+          One careless touch in an antique shop. One impossible world beyond the veil.
+          One fae whose life may become tangled with yours — for better, or for worse.
+        </p>
+        <div class="title-actions">
+          <button id="continueBtn" class="btn primary" type="button">Continue</button>
+          <button id="newGameBtn" class="btn" type="button">Begin a New Story</button>
+          <button id="endingsBtn" class="btn ghost" type="button">Endings</button>
+        </div>
+        <p id="endingCounter" class="ending-counter"></p>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen hidden" aria-live="polite">
+      <header class="game-header">
+        <div>
+          <p id="chapterLabel" class="eyebrow">Chapter</p>
+          <h2 id="locationLabel">The Veil</h2>
+        </div>
+        <div class="header-tools">
+          <div id="heartglassStatus" class="heartglass-status" title="The Heartglass reflects the shape of the bond." aria-label="Heartglass status">
+            <span class="mini-gem" aria-hidden="true"></span>
+            <span id="heartglassText">Quiet</span>
+          </div>
+          <button id="menuBtn" class="icon-btn" type="button" aria-label="Open menu">☰</button>
+        </div>
+      </header>
+
+      <div class="story-stage">
+        <aside id="portraitPanel" class="portrait-panel hidden" aria-hidden="true">
+          <img id="portrait" src="" alt="" draggable="false" />
+          <div id="nameplate" class="nameplate"></div>
+        </aside>
+
+        <article class="dialogue-card glass-card">
+          <div id="speaker" class="speaker"></div>
+          <div id="storyText" class="story-text"></div>
+          <div id="choices" class="choices"></div>
+          <button id="continueStoryBtn" class="btn primary continue-story hidden" type="button">Continue</button>
+        </article>
+      </div>
+
+      <footer class="game-footer">
+        <span>Choices are permanent for this playthrough.</span>
+        <span id="saveIndicator">Autosave on</span>
+      </footer>
+    </section>
+
+    <section id="endingsScreen" class="screen endings-screen hidden">
+      <div class="endings-card glass-card">
+        <button id="closeEndingsBtn" class="icon-btn close-corner" type="button" aria-label="Close endings">×</button>
+        <p class="eyebrow">Your storybook</p>
+        <h2>Endings Discovered</h2>
+        <div id="endingGrid" class="ending-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalBackdrop" class="modal-backdrop hidden" role="presentation">
+    <div id="menuModal" class="modal glass-card" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+      <h2 id="menuTitle">Story Menu</h2>
+      <p>Your current choice history cannot be rewound. Restarting begins from the antique shop.</p>
+      <div class="modal-actions">
+        <button id="resumeBtn" class="btn primary" type="button">Resume</button>
+        <button id="viewEndingsFromMenuBtn" class="btn" type="button">View Endings</button>
+        <button id="restartBtn" class="btn danger" type="button">Restart Story</button>
+      </div>
+    </div>
+
+    <div id="confirmModal" class="modal glass-card hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h2 id="confirmTitle">Restart from the beginning?</h2>
+      <p>This erases every choice in the current playthrough. Discovered endings remain in your storybook.</p>
+      <div class="modal-actions split">
+        <button id="cancelRestartBtn" class="btn" type="button">Keep Playing</button>
+        <button id="confirmRestartBtn" class="btn danger" type="button">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
