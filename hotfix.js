@@ -1,29 +1,47 @@
 (() => {
   "use strict";
 
-  // Heartglass compatibility patch for the original V1 formatter.
-  // V1 supports {name} but some story lines use {Name}.
-  // Prefer the visible nameplate (most reliable), then fall back to save data.
-  function currentDateableName() {
-    const plate = document.getElementById("nameplate");
-    const visibleName = plate && plate.textContent ? plate.textContent.trim() : "";
-    if (visibleName === "Caelan" || visibleName === "Caelia") return visibleName;
+  // Heartglass V1 compatibility layer.
+  // From this build onward, both Caelan and Caelia use they/them/their pronouns
+  // in narration. Their names and gendered partner titles still stay distinct.
 
-    for (const key of ["heartglass_run_v2", "heartglass_run_v1"]) {
-      try {
-        const state = JSON.parse(localStorage.getItem(key));
-        if (state && state.route === "male") return "Caelan";
-        if (state && state.route === "female") return "Caelia";
-      } catch (_) {}
-    }
-    return null;
+  const nativeReplaceAll = String.prototype.replaceAll;
+  if (!String.prototype.__heartglassNeutralPronouns) {
+    Object.defineProperty(String.prototype, "__heartglassNeutralPronouns", {
+      value: true,
+      configurable: false,
+      enumerable: false
+    });
+
+    String.prototype.replaceAll = function (search, replacement) {
+      const neutral = {
+        "{subj}": "they",
+        "{Subj}": "They",
+        "{obj}": "them",
+        "{Obj}": "Them",
+        "{poss}": "their",
+        "{Poss}": "Their",
+        "{reflexive}": "themselves"
+      };
+
+      if (typeof search === "string" && Object.prototype.hasOwnProperty.call(neutral, search)) {
+        replacement = neutral[search];
+      }
+
+      let result = nativeReplaceAll.call(String(this), search, replacement);
+
+      // Some original V1 prose accidentally used {Name}, which the formatter
+      // never defined. Treat those as pronouns instead of names.
+      result = nativeReplaceAll.call(result, "{Name}’s", "Their");
+      result = nativeReplaceAll.call(result, "{Name}'s", "Their");
+      result = nativeReplaceAll.call(result, "{Name}", "They");
+      result = nativeReplaceAll.call(result, "{NAME}", "THEY");
+      return result;
+    };
   }
 
-  function replaceTokens(root) {
+  function repairVisiblePlaceholders(root) {
     if (!root) return;
-    const name = currentDateableName();
-    if (!name) return;
-
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const nodes = [];
     let n;
@@ -32,32 +50,25 @@
     for (const textNode of nodes) {
       if (!textNode.nodeValue) continue;
       let value = textNode.nodeValue;
-      if (value.includes("{Name}")) value = value.replaceAll("{Name}", name);
-      if (value.includes("{NAME}")) value = value.replaceAll("{NAME}", name.toUpperCase());
+      value = nativeReplaceAll.call(value, "{Name}’s", "Their");
+      value = nativeReplaceAll.call(value, "{Name}'s", "Their");
+      value = nativeReplaceAll.call(value, "{Name}", "They");
+      value = nativeReplaceAll.call(value, "{NAME}", "THEY");
       if (value !== textNode.nodeValue) textNode.nodeValue = value;
     }
   }
 
   function sweep() {
-    replaceTokens(document.getElementById("storyText"));
-    replaceTokens(document.getElementById("choices"));
-    replaceTokens(document.getElementById("speaker"));
+    repairVisiblePlaceholders(document.getElementById("storyText"));
+    repairVisiblePlaceholders(document.getElementById("choices"));
+    repairVisiblePlaceholders(document.getElementById("speaker"));
   }
 
   function start() {
     const app = document.getElementById("app") || document.body;
     const observer = new MutationObserver(sweep);
     observer.observe(app, { childList: true, subtree: true, characterData: true });
-
-    // Immediate sweep and a brief fallback interval cover already-rendered text
-    // and any browser/GitHub Pages timing differences.
     sweep();
-    let runs = 0;
-    const timer = setInterval(() => {
-      sweep();
-      runs += 1;
-      if (runs >= 40) clearInterval(timer);
-    }, 250);
   }
 
   if (document.readyState === "loading") {
