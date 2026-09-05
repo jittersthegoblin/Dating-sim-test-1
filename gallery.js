@@ -23,9 +23,8 @@
   const endingIds = endings.map(x => x.id);
 
   function imageFor(route, ending) {
-    if (ending === "marriage") return `assets/sprites/${route}_wedding.png`;
-    return `assets/endings/${route}_${ending}.webp`;
-  }
+  return `assets/endings/${route}_${ending}.webp`;
+}
 
   function altFor(route, ending) {
     const name = routes[route]?.name || "The fae";
